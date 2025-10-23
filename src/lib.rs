@@ -46,7 +46,12 @@
 use adbc_core::options::{OptionConnection, OptionValue};
 use adbc_core::{Connection, Database};
 use std::error::Error as StdError;
-use std::fmt;
+use std::{
+    sync::{Arc, Mutex},
+    fmt,
+};
+
+
 
 /// An r2d2 connection manager for ADBC connections.
 ///
@@ -60,15 +65,17 @@ use std::fmt;
 /// * `D` - The ADBC Database implementation type
 pub struct AdbcConnectionManager<D>
 where
-    D: Database,
+    D: Database + Send,
+    D::ConnectionType: Send
 {
-    database: D,
+    database: Arc<Mutex<D>>,
     connection_options: Vec<(String, String)>,
 }
 
 impl<D> AdbcConnectionManager<D>
 where
-    D: Database,
+    D: Database + Send,
+    D::ConnectionType: Send,
 {
     /// Creates a new `AdbcConnectionManager` with the given database.
     ///
@@ -90,7 +97,7 @@ where
     /// ```
     pub fn new(database: D) -> Self {
         Self {
-            database,
+            database: Arc::new(Mutex::new(database)),
             connection_options: Vec::new(),
         }
     }
@@ -123,7 +130,7 @@ where
         I: IntoIterator<Item = (String, String)>,
     {
         Self {
-            database,
+            database: Arc::new(Mutex::new(database)),
             connection_options: options.into_iter().collect(),
         }
     }
@@ -186,9 +193,21 @@ impl From<adbc_core::error::Error> for AdbcError {
     }
 }
 
+impl<D> From<std::sync::PoisonError<std::sync::MutexGuard<'_, D>>> for AdbcError
+where
+    D: Database,
+{
+    fn from(err: std::sync::PoisonError<std::sync::MutexGuard<'_, D>>) -> Self {
+        AdbcError(adbc_core::error::Error::with_message_and_status(
+            format!("Failed to acquire database lock: {}", err),
+            adbc_core::error::Status::Internal,
+        ))
+    }
+}
+
 impl<D> r2d2::ManageConnection for AdbcConnectionManager<D>
 where
-    D: Database + Send + Sync + 'static,
+    D: Database + Send + 'static,
     D::ConnectionType: Send + 'static,
 {
     type Connection = D::ConnectionType;
@@ -199,10 +218,11 @@ where
     /// If connection options were provided, they will be passed to the connection
     /// during initialization.
     fn connect(&self) -> Result<Self::Connection, Self::Error> {
+        let database = self.database.lock()?;
         if self.connection_options.is_empty() {
-            self.database.new_connection().map_err(AdbcError::from)
+            database.new_connection().map_err(AdbcError::from)
         } else {
-            self.database
+            database
                 .new_connection_with_opts(
                     self.connection_options
                         .iter()
