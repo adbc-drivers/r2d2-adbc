@@ -21,7 +21,7 @@ license = "Apache-2.0"
 version = "0.1.0"
 edition = "2024"
 keywords = ["adbc", "r2d2", "sql", "pool", "database"]
-categories = ["database", "connection-pooling"]
+categories = ["database"]
 description = "An ADBC connection pool implementation using r2d2."
 repository = "https://github.com/adbc-drivers/r2d2-adbc"
 
