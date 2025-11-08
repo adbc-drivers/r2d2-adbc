@@ -66,7 +66,7 @@ use std::{
 pub struct AdbcConnectionManager<D>
 where
     D: Database + Send,
-    D::ConnectionType: Send
+    D::ConnectionType: Send + Sync,
 {
     database: Arc<Mutex<D>>,
     connection_options: Vec<(String, String)>,
@@ -75,7 +75,7 @@ where
 impl<D> AdbcConnectionManager<D>
 where
     D: Database + Send,
-    D::ConnectionType: Send,
+    D::ConnectionType: Send + Sync,
 {
     /// Creates a new `AdbcConnectionManager` with the given database.
     ///
@@ -205,10 +205,16 @@ where
     }
 }
 
+unsafe impl<D> Send for AdbcConnectionManager<D> 
+where
+    D: Database + Send,
+    D::ConnectionType: Send + Sync,
+{}
+
 impl<D> r2d2::ManageConnection for AdbcConnectionManager<D>
 where
     D: Database + Send + 'static,
-    D::ConnectionType: Send + 'static,
+    D::ConnectionType: Send + Sync + 'static,
 {
     type Connection = D::ConnectionType;
     type Error = AdbcError;
