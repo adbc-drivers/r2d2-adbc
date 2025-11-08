@@ -22,6 +22,8 @@ version = "0.1.0"
 edition = "2024"
 keywords = ["adbc", "r2d2", "sql", "pool", "database"]
 categories = ["database", "connection-pooling"]
+description = "An ADBC connection pool implementation using r2d2."
+repository = "https://github.com/adbc-drivers/r2d2-adbc"
 
 [lib]
 name = "r2d2_adbc"
