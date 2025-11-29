@@ -4,9 +4,9 @@ version = 4
 
 [[package]]
 name = "adbc_core"
-version = "0.20.0"
+version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5b891479797b5588e320f7fd3caf15faba311cf8f8a76911195b6a3d55304eb"
+checksum = "1a38cdcc3e43dc645038c2b6339dd98610c48ae593cc67839452e6670fa09f27"
 dependencies = [
  "arrow-array",
  "arrow-schema",
