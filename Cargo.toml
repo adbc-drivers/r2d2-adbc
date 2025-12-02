@@ -30,5 +30,5 @@ name = "r2d2_adbc"
 path = "src/lib.rs"
 
 [dependencies]
-adbc_core = "0.20.0"
+adbc_core = "0.21.0"
 r2d2 = "0.8.10"
