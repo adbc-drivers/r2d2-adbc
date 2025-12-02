@@ -414,7 +414,7 @@ dependencies = [
 
 [[package]]
 name = "r2d2_adbc"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "adbc_core",
  "r2d2",

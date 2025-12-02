@@ -18,7 +18,7 @@
 [package]
 name = "r2d2_adbc"
 license = "Apache-2.0"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 keywords = ["adbc", "r2d2", "sql", "pool", "database"]
 categories = ["database"]
